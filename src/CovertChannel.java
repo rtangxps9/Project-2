@@ -44,20 +44,52 @@ public class CovertChannel {
 				long startTime = System.currentTimeMillis();
 
 				inputFile = new FileInputStream(new File(fileName));
-
+				int mybyte;
+				
 				InstructionObject createHal   =  new InstructionObject("CREATE HAL OBJ");
 				InstructionObject createLyle  =  new InstructionObject("CREATE LYLE OBJ");
 				InstructionObject writeLyle   =  new InstructionObject("WRITE LYLE OBJ 1");
 				InstructionObject readLyle    =  new InstructionObject("READ LYLE OBJ");
 				InstructionObject destroyLyle =  new InstructionObject("DESTROY LYLE OBJ");
 				InstructionObject runLyle     =  new InstructionObject("RUN LYLE");
-
-				sys.execute(createLyle, outputFile);
-				sys.execute(writeLyle, outputFile);
-				sys.execute(readLyle, outputFile);
-				sys.execute(destroyLyle, outputFile);
-				sys.execute(runLyle, outputFile);
-
+				
+				while((mybyte = inputFile.read()) != -1) {
+					for (int bit = 0; bit <= 7; bit++) {
+						if (((mybyte >> (7 - bit)) & 0) == 0) {
+							if (verbose)
+								logFile.write("CREATE HAL OBJ");
+							sys.execute(createHal, outputFile);
+						}
+						
+						// Lyles runs 
+						if (verbose)
+							logFile.write("CREATE LYLE OBJ\n"
+									+ "WRITE LYLE OBJ 1\n"
+									+ "READ LYLE OBJ\n"
+									+ "DESTROY LYLE OBJ\n"
+									+ "RUN LYLE\n");
+						
+						sys.execute(createLyle, outputFile);
+						sys.execute(writeLyle, outputFile);
+						sys.execute(readLyle, outputFile);
+						sys.execute(destroyLyle, outputFile);
+						sys.execute(runLyle, outputFile);
+					}
+					
+				}
+				
+				long endTime = System.currentTimeMillis();
+				
+				long filesize = inputFile.getChannel().size();
+				long bandwidth = filesize * 8 / (endTime - startTime);
+				
+				System.out.println("Document: " + fileName);
+				System.out.println("Size: " + filesize);
+				System.out.println("Bandwidth: " + bandwidth);
+				
+				outputFile.write((byte) '\n');
+				outputFile.close();
+				
 				if (logFile != null)
 					logFile.close();
 
