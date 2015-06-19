@@ -88,7 +88,15 @@ public class ReferenceMonitor {
 						om.destroyObject(currObj);
 					break;
 				case RUN:
-					
+					thisSub.appendBit();
+					if(thisSub.getByteBuffer().length() == 8) {
+						if(thisSub.getByteBuffer().equals("00000000"))
+							return 0;
+						int nextChar = Integer.parseInt(thisSub.getByteBuffer(),2);
+						output.write(nextChar);
+						thisSub.setByteBuffer("");
+					}
+					thisSub.setValue(0);
 					break;
 				default:
 					System.out.println("You shouldn't be here.");
